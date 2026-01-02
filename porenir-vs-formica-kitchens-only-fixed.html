@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>חידון: פורניר או פורמייקה – מטבחים בלבד</title>
+  <style>
+    :root{--bg:#0b0f14;--card:#111827;--muted:#9ca3af;--text:#e5e7eb;--good:#22c55e;--bad:#ef4444;--btn:#1f2937;--btn2:#0f172a;--border:rgba(255,255,255,.12);}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",system-ui,Arial,sans-serif;
+      background:radial-gradient(1200px 600px at 20% -10%, rgba(34,197,94,.18), transparent 60%),
+                 radial-gradient(1200px 600px at 80% -20%, rgba(59,130,246,.15), transparent 60%),
+                 var(--bg);
+      color:var(--text);
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    .wrap{max-width:980px;margin:0 auto;padding:18px}
+    header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      padding:14px 12px;border:1px solid var(--border);border-radius:14px;background:rgba(17,24,39,.85);
+      position:sticky;top:10px;backdrop-filter:blur(8px);z-index:10;}
+    .title{font-size:18px;font-weight:800}
+    .meta{color:var(--muted);font-size:13px}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(15,23,42,.65)}
+    .pill b{font-variant-numeric:tabular-nums}
+    .grid{display:grid;gap:14px;margin-top:14px}
+    .card{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:rgba(17,24,39,.88)}
+    .card-top{padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .qtitle{font-weight:750;line-height:1.3}
+    .qid{color:var(--muted);font-size:12px;white-space:nowrap}
+    .imgwrap{background:#0a0d12;min-height:180px;display:flex;align-items:center;justify-content:center}
+    img{width:100%;height:auto;display:block}
+    .imgfail{padding:18px;color:var(--muted);text-align:center}
+    .controls{padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    button{border:1px solid var(--border);background:var(--btn);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:650}
+    button.secondary{background:var(--btn2)}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .result{padding:0 14px 14px;color:var(--muted);display:none}
+    .result .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:800;margin-left:8px;border:1px solid var(--border)}
+    .badge.good{background:rgba(34,197,94,.18);color:#bbf7d0}
+    .badge.bad{background:rgba(239,68,68,.18);color:#fecaca}
+    a{color:#93c5fd;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .footer{margin:18px 0 8px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:rgba(17,24,39,.88);color:var(--muted);font-size:13px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .bigbtn{padding:10px 14px;border-radius:14px}
+    .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);z-index:9999}
+    .modal{width:min(560px,100%);border:1px solid var(--border);border-radius:18px;background:rgba(17,24,39,.92);padding:16px}
+    .modal h1{margin:6px 0 6px;font-size:20px}
+    .modal p{margin:0 0 10px;color:var(--muted);line-height:1.35}
+    .modal .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .notice{margin-top:10px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px}
+    .hidden{display:none !important}
+  </style>
+</head>
+<body>
+  <div id="startOverlay" class="overlay">
+    <div class="modal">
+      <h1>פורניר או פורמייקה?</h1>
+      <p>מטבחים בלבד. חומר אחד לכל מטבח. לחצו “התחל” ואז בחרו תשובה בכל כרטיס.</p>
+      <div class="actions">
+        <button id="startBtn" class="bigbtn">התחל</button>
+        <button id="howBtn" class="bigbtn secondary">אם תמונות לא נטענות</button>
+      </div>
+      <div id="howBox" class="notice hidden">
+        אם אתם רואים סימן שאלה במקום תמונה: זה חסימת “Hotlink” של אתר המקור. בכל כרטיס יש קישור “לינק למקור” — פתחו אותו ובדקו שם את התמונה.
+        <br/>פתרון קבוע: להעלות את התמונות לריפו עצמו (images/) ולשנות את ה-URLs לכתובות מהאתר שלכם.
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="title">חידון: פורניר או פורמייקה (מטבחים בלבד)</div>
+        <div class="meta">לחצו על התשובה — תקבלו משוב + לינק למקור התמונה.</div>
+      </div>
+      <div class="row">
+        <div class="pill">ניקוד: <b id="score">0</b>/<b id="total">8</b></div>
+        <div class="pill">נענו: <b id="answered">0</b>/<b id="total2">8</b></div>
+        <button class="bigbtn secondary" id="resetBtn">איפוס</button>
+      </div>
+    </header>
+
+    <div id="cards" class="grid"></div>
+
+    <div class="footer">
+      הערה: אם אתר מקור חוסם טעינה ישירה של תמונות, תראו כפתור “פתח תמונה” במקום התמונה. עדיין אפשר לשחק — פשוט לפתוח את המקור בטאב חדש.
+    </div>
+  </div>
+
+<script>
+  const DATA = [{"material": "פורמייקה", "title": "מטבח למינייט דמוי עץ – Wilsonart (יישום נוסף)", "img": "https://images.wilsonart.com/media/wysiwyg/furniture_1.jpg", "source": "https://www.wilsonart.com/wilsonartwoodgrains", "why": "יישום Woodgrains תחת HPL באתר היצרן; מראה אחיד/תעשייתי."}, {"material": "פורמייקה", "title": "מטבח למינייט דמוי עץ – Wilsonart (יישום קיר/ארון)", "img": "https://images.wilsonart.com/media/wysiwyg/wall-panels_1.jpg", "source": "https://www.wilsonart.com/wilsonartwoodgrains", "why": "מופיע תחת Woodgrains HPL באתר היצרן."}, {"material": "פורמייקה", "title": "מטבח למינייט דמוי עץ – Wilsonart (Doors application)", "img": "https://images.wilsonart.com/media/wysiwyg/doors_1.jpg", "source": "https://www.wilsonart.com/wilsonartwoodgrains", "why": "קטגוריית Doors תחת Woodgrains HPL באתר היצרן."}, {"material": "פורניר", "title": "מטבח אלון טבעי – Reform (חלל מלא)", "img": "https://cdn-ws.reformcph.com/contents/pageblockmedia/shaker-plain-toldbod-027.webp", "source": "https://www.reformcph.com/en/kitchens/collections/plain/plain-natural-oak", "why": "מטבח שלם עם חזיתות עץ טבעי; מראה פחות אחיד מלמינייט."}, {"material": "פורניר", "title": "מטבח אלון טבעי – Reform (זווית נוספת)", "img": "https://cdn-ws.reformcph.com/contents/pageblockmedia/reform-b2-plain-08-v1.webp", "source": "https://www.reformcph.com/en/kitchens/collections/plain/plain-natural-oak", "why": "עוד תמונת מטבח שלם מאותו דף יצרן. וריאציות עדינות בגרעין."}, {"material": "פורמייקה", "title": "מטבח למינייט דמוי עץ – Wilsonart (Woodgrain HPL)", "img": "https://images.wilsonart.com/media/wysiwyg/tops_1.jpg", "source": "https://www.wilsonart.com/wilsonartwoodgrains", "why": "המקור מגדיר Woodgrain HPL (למינייט בלחץ גבוה)."}, {"material": "פורניר", "title": "מטבח פורניר מוכן – Decospan Shinnoki (Ivory Oak)", "img": "https://assets-eu-01.kc-usercontent.com/38bd768a-2b63-01ad-c3fc-11a0b411a078/4893a599-e6dc-4550-8f00-13ab1bdb9ede/04_PROJECT_IVORY-OAK_Kitchen_vertical.jpg", "source": "https://www.decospan.com/en-gb/shinnoki", "why": "Shinnoki מוגדרים ע״י היצרן כ-wood veneer panels; זו תמונת מטבח שלם."}, {"material": "פורניר", "title": "מטבח אלון טבעי – Reform PLAIN Natural Oak", "img": "https://cdn-ws.reformcph.com/contents/pageblock/reform-b2-plain-06-v1-copy-02.webp", "source": "https://www.reformcph.com/en/kitchens/collections/plain/plain-natural-oak", "why": "שונות טבעית בסיבים, מרקם עץ אמיתי. המקור הוא דף יצרן של קולקציית עץ."}];
+  let score = 0, answered = 0;
+
+  const scoreEl = document.getElementById('score');
+  const answeredEl = document.getElementById('answered');
+  const cardsEl = document.getElementById('cards');
+
+  function setStats(){ scoreEl.textContent = score; answeredEl.textContent = answered; }
+
+  function reset(){
+    score = 0; answered = 0;
+    cardsEl.innerHTML = '';
+    render();
+    setStats();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function makeCard(item, idx){
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.answered = '0';
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div><div class="qtitle">מה זה? <span style="color:var(--muted); font-weight:650">(${item.title})</span></div></div>
+        <div class="qid">שאלה ${idx+1}</div>
+      </div>
+      <div class="imgwrap">
+        <img referrerpolicy="no-referrer" src="${item.img}" alt="שאלה ${idx+1}" loading="lazy">
+      </div>
+      <div class="controls">
+        <button class="pick" data-pick="פורניר">פורניר</button>
+        <button class="pick" data-pick="פורמייקה">פורמייקה</button>
+        <button class="secondary reveal">גלה תשובה</button>
+      </div>
+      <div class="result"></div>
+    `;
+
+    const img = card.querySelector('img');
+    const imgwrap = card.querySelector('.imgwrap');
+    img.addEventListener('error', () => {
+      imgwrap.innerHTML = `
+        <div class="imgfail">
+          התמונה לא נטענה (חסימת אתר מקור).<br/>
+          <a href="${item.img}" target="_blank" rel="noopener">פתח תמונה</a> ·
+          <a href="${item.source}" target="_blank" rel="noopener">לינק למקור</a>
+        </div>`;
+    });
+
+    const resultEl = card.querySelector('.result');
+    const pickBtns = [...card.querySelectorAll('button.pick')];
+    const revealBtn = card.querySelector('button.reveal');
+
+    function lockButtons(){ pickBtns.forEach(b => b.disabled = true); revealBtn.disabled = true; }
+
+    function showResult(chosen){
+      const correct = item.material;
+      const ok = (chosen === correct);
+      const badge = ok ? `<span class="badge good">נכון</span>` : (chosen ? `<span class="badge bad">לא נכון</span>` : `<span class="badge">תשובה</span>`);
+      const chosenLine = chosen ? `בחרתם: <b>${chosen}</b> · ` : '';
+      resultEl.innerHTML = `
+        <div style="margin-top:10px">
+          ${badge} ${chosenLine}התשובה: <b>${correct}</b><br/>
+          <span style="color:var(--muted)">${item.why}</span><br/>
+          מקור: <a href="${item.source}" target="_blank" rel="noopener">לינק למקור</a>
+        </div>`;
+      resultEl.style.display = 'block';
+    }
+
+    pickBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (card.dataset.answered === '1') return;
+        card.dataset.answered = '1';
+        const chosen = btn.dataset.pick;
+        if (chosen === item.material) score += 1;
+        answered += 1;
+        setStats();
+        showResult(chosen);
+        lockButtons();
+      });
+    });
+
+    revealBtn.addEventListener('click', () => {
+      if (card.dataset.answered === '1') return;
+      card.dataset.answered = '1';
+      answered += 1;
+      setStats();
+      showResult(null);
+      lockButtons();
+    });
+
+    return card;
+  }
+
+  function render(){ DATA.forEach((item, idx) => cardsEl.appendChild(makeCard(item, idx))); }
+
+  document.getElementById('resetBtn').addEventListener('click', reset);
+
+  // start overlay
+  const overlay = document.getElementById('startOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const howBtn = document.getElementById('howBtn');
+  const howBox = document.getElementById('howBox');
+
+  howBtn.addEventListener('click', () => howBox.classList.toggle('hidden'));
+  startBtn.addEventListener('click', () => {
+    overlay.classList.add('hidden');
+    if (!cardsEl.children.length) render();
+    setStats();
+  });
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.add('hidden');
+      if (!cardsEl.children.length) render();
+      setStats();
+    }
+  });
+</script>
+</body>
+</html>
