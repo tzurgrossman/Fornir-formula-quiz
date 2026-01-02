@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>חידון: פורניר או פורמייקה – מטבחים בלבד</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;background:#0b0f14;color:#e5e7eb;margin:0;padding:16px}
+.card{border:1px solid #333;border-radius:14px;margin-bottom:16px;overflow:hidden}
+img{width:100%;display:block}
+.controls{padding:12px;display:flex;gap:10px}
+button{flex:1;padding:12px;border-radius:10px;border:none;background:#1f2937;color:white;font-weight:600}
+.result{padding:12px;display:none;color:#9ca3af}
+</style>
+</head>
+<body>
+<h1>פורניר או פורמייקה?</h1>
+<p>מטבחים שלמים בלבד. חומר אחד לכל מטבח.</p>
+<div id="quiz"></div>
+
+<script>
+const DATA = [{"material": "פורניר", "title": "מטבח אגוז – Boffi Walnut", "img": "https://www.boffi.com/wp-content/uploads/2020/10/boffi-kitchens-walnut.jpg", "source": "https://www.boffi.com/en/kitchens/", "why": "מטבח אגוז כהה עם עומק טבעי – פורניר."}, {"material": "פורניר", "title": "מטבח אלון בהיר – Nordiska Kök", "img": "https://nordiskakok.com/app/uploads/2021/03/NordiskaKok_Classic-Oak_Kitchen.jpg", "source": "https://nordiskakok.com/kok/classic-oak/", "why": "היצרן מציין Oak Veneer; גרעין עץ טבעי."}, {"material": "פורמייקה", "title": "מטבח למינייט דמוי עץ – Leicht", "img": "https://www.leicht.com/fileadmin/_processed_/a/0/csm_Laminate_kitchen_wood_look_Leicht_b0e7b9c7a3.jpg", "source": "https://www.leicht.com/en/materials/laminate/", "why": "Laminate Wood Look – מטבח שלם מלמינייט."}, {"material": "פורמייקה", "title": "מטבח למינייט אלון – Egger", "img": "https://www.egger.com/shop/medias/egger-laminate-woodgrain-kitchen.jpg", "source": "https://www.egger.com/en/products/laminates", "why": "Egger מגדירים Laminate; דוגמה אחידה."}, {"material": "פורניר", "title": "מטבח אלון מינימליסטי – Puustelli", "img": "https://www.puustelli.com/wp-content/uploads/2019/06/oak-veneer-kitchen.jpg", "source": "https://www.puustelli.com/kitchens/", "why": "מטבח שלם מפורניר אלון בלבד."}, {"material": "פורמייקה", "title": "מטבח למינייט מודרני – Wilsonart", "img": "https://blog.wilsonart.com/wp-content/uploads/2019/04/Woodgrain-Kitchen.jpg", "source": "https://www.wilsonart.com/woodgrains", "why": "Woodgrain HPL – למינייט."}, {"material": "פורניר", "title": "מטבח אלון טבעי – Reform PLAIN Oak", "img": "https://cdn-ws.reformcph.com/contents/pageblock/reform-b2-plain-06-v1-copy-02.webp", "source": "https://www.reformcph.com/en/kitchens/collections/plain/plain-natural-oak", "why": "מטבח שלם מפורניר אלון; שונות טבעית בסיבים."}, {"material": "פורמייקה", "title": "מטבח למינייט בהיר – Kronospan", "img": "https://www.kronospan.com/fileadmin/content/kronospan/boards/laminate-kitchen.jpg", "source": "https://www.kronospan.com/en/products/laminates/", "why": "Laminate kitchen application."}];
+const quiz = document.getElementById('quiz');
+
+DATA.forEach(item => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <img src="${item.img}">
+    <div class="controls">
+      <button>פורניר</button>
+      <button>פורמייקה</button>
+    </div>
+    <div class="result"></div>
+  `;
+  const buttons = card.querySelectorAll('button');
+  const result = card.querySelector('.result');
+
+  buttons.forEach(btn => btn.onclick = () => {
+    result.style.display='block';
+    if(btn.textContent===item.material){
+      result.innerHTML = "✔️ נכון! " + item.why + `<br><a href="${item.source}" target="_blank">מקור</a>`;
+    } else {
+      result.innerHTML = "❌ לא נכון. התשובה: " + item.material + "<br>" + item.why + `<br><a href="${item.source}" target="_blank">מקור</a>`;
+    }
+    buttons.forEach(b=>b.disabled=true);
+  });
+
+  quiz.appendChild(card);
+});
+</script>
+</body>
+</html>
