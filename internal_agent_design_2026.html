@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADR: Internal AI Agent System (2026)</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#f4f4f4',
+                edgeLabelBackground: '#ffffff',
+                tertiaryColor: '#fff',
+                fontFamily: 'Inter, system-ui, sans-serif'
+            }
+        });
+    </script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #1a202c;
+            --accent-color: #2563eb;
+            --border-color: #e2e8f0;
+            --section-bg: #f8fafc;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h1, h2, h3 { color: #0f172a; margin-top: 1.5em; }
+        h1 { border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; }
+        .meta-data {
+            background: var(--section-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9em;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .meta-item strong { color: var(--accent-color); }
+        .diagram-container {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: center;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; }
+        th { background-color: var(--section-bg); }
+        code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-family: 'Menlo', monospace; font-size: 0.9em; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #dcfce7;
+            color: #166534;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        footer { margin-top: 50px; border-top: 1px solid var(--border-color); padding-top: 20px; font-size: 0.8em; color: #64748b; }
+    </style>
+</head>
+<body>
+
+    <h1>Architectural Design Review (ADR)</h1>
+    
+    <div class="meta-data">
+        <div class="meta-item"><strong>Project:</strong> Internal Ops AI Agent</div>
+        <div class="meta-item"><strong>Status:</strong> <span class="status-badge">APPROVED</span></div>
+        <div class="meta-item"><strong>Date:</strong> January 10, 2026</div>
+        <div class="meta-item"><strong>Target Audience:</strong> Internal DevOps / Engineering</div>
+        <div class="meta-item"><strong>Core Model:</strong> Claude 4.5 Sonnet</div>
+        <div class="meta-item"><strong>Region:</strong> AWS us-west-2 (Oregon)</div>
+    </div>
+
+    <h2>1. Executive Summary</h2>
+    <p>
+        This document outlines the architecture for a minimalist, headless AI agent system designed for internal operational support. 
+        Leveraging the <strong>2026 AWS Bedrock ecosystem</strong>, the system moves away from custom vector databases and complex orchestration code, 
+        relying instead on managed <strong>Bedrock Agents</strong> and native <strong>Model Context Protocol (MCP)</strong> integration.
+    </p>
+    <p>
+        <strong>Key Goal:</strong> Correctness over conversation. The system prioritizes strict adherence to rules defined in a "Structured Knowledge Layer."
+    </p>
+
+    <h2>2. System Architecture (High Level)</h2>
+    <p>
+        The architecture is fully serverless. Users interact via a CLI or Script, which invokes the Bedrock Agent Runtime. 
+        The Agent uses a single "MCP Gateway" Lambda to interface with existing internal tools.
+    </p>
+
+    <div class="diagram-container">
+        <pre class="mermaid">
+        graph LR
+            subgraph "Client Side"
+                User[Ops Engineer]
+                CLI[Python CLI / Script]
+            end
+
+            subgraph "AWS Cloud (us-west-2)"
+                subgraph "Orchestration Layer"
+                    Agent[Bedrock Agent<br>Claude 4.5 Sonnet]
+                    Mem[Bedrock Memory<br>(Session State)]
+                end
+
+                subgraph "Knowledge Layer"
+                    KB[Bedrock Knowledge Base]
+                    Opus[Claude 4.5 Opus<br>(Ingestion Parser)]
+                    S3_Docs[(S3: Rules & Patterns)]
+                end
+
+                subgraph "Tool Layer"
+                    Lambda[Lambda: MCP Gateway]
+                    S3_Schema[(MCP Schemas)]
+                end
+            end
+
+            subgraph "Internal Network"
+                MCP_Server[Existing MCP Servers<br>(ECS/EC2)]
+            end
+
+            User -->|Command| CLI
+            CLI -->|Invoke Agent API| Agent
+            Agent <-->|Retrieve Rules| KB
+            Agent <-->|Execute Tool| Lambda
+            KB <-->|Parse & Index| S3_Docs
+            Opus -.->|Advanced Parsing| KB
+            Lambda <-->|JSON-RPC| MCP_Server
+        </pre>
+    </div>
+
+    <h2>3. Detailed Component Design</h2>
+
+    <h3>3.1 The "Brain" (Model & Orchestration)</h3>
+    <p>
+        We utilize <strong>Claude 4.5 Sonnet</strong> for the agent runtime due to its superior reasoning capabilities and reduced hallucination rates compared to v3.5.
+        Temperature is set to <code>0.0</code> to enforce strict rule following.
+    </p>
+
+    <h3>3.2 Knowledge Layer (The "Memory")</h3>
+    <p>
+        Instead of standard chunking, we use <strong>Hierarchical Indexing</strong> powered by <strong>Claude 4.5 Opus</strong> during ingestion.
+        Opus pre-processes Markdown files into logical "Q&A" blocks before vectorization, ensuring the agent retrieves <em>concepts</em> rather than just matching keywords.
+    </p>
+
+    <div class="diagram-container">
+        <pre class="mermaid">
+        sequenceDiagram
+            participant User
+            participant Agent as Bedrock Agent (Sonnet 4.5)
+            participant KB as Knowledge Base
+            participant Tool as MCP Lambda
+
+            User->>Agent: "Restart the payment gateway."
+            
+            rect rgb(240, 248, 255)
+            Note over Agent, KB: Phase 1: Reasoning & Safety Check
+            Agent->>KB: Query: "Rules for restarting payment gateway"
+            KB-->>Agent: Returns: "Rule #4: Do not restart during business hours."
+            end
+
+            alt Rule Violation
+                Agent-->>User: "I cannot restart. Rule #4 prohibits this during business hours."
+            else Rule Passed
+                rect rgb(255, 245, 235)
+                Note over Agent, Tool: Phase 2: Tool Execution
+                Agent->>Tool: Call: restart_service(service="payment-gateway")
+                Tool-->>Agent: { "status": "success", "pid": 4022 }
+                end
+                Agent-->>User: "Service restarted successfully."
+            end
+        </pre>
+    </div>
+
+    <h3>3.3 Tool Layer (MCP Gateway Pattern)</h3>
+    <p>
+        To avoid managing hundreds of Lambda functions, we implement a single <strong>Generic MCP Client Lambda</strong>.
+        The Bedrock Agent passes the tool name and parameters to this Lambda, which acts as a proxy to your internal MCP servers.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Component</th>
+                <th>Specification</th>
+                <th>Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Agent Model</strong></td>
+                <td>Claude 4.5 Sonnet</td>
+                <td>Reasoning, planning, and tool orchestration.</td>
+            </tr>
+            <tr>
+                <td><strong>Ingestion Model</strong></td>
+                <td>Claude 4.5 Opus</td>
+                <td>"Advanced Parsing" of S3 documents into vector chunks.</td>
+            </tr>
+            <tr>
+                <td><strong>Vector Store</strong></td>
+                <td>OpenSearch Serverless</td>
+                <td>Managed storage for Knowledge Base embeddings.</td>
+            </tr>
+            <tr>
+                <td><strong>Compute</strong></td>
+                <td>AWS Lambda (Python 3.12)</td>
+                <td>Stateless wrapper for MCP protocol.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. Phased Implementation Plan</h2>
+
+    <h3>Phase 1: Stateless Kernel (Weeks 1-2)</h3>
+    <ul>
+        <li><strong>Goal:</strong> Functional reasoning engine that can read S3 docs and call 1 tool.</li>
+        <li><strong>Infrastructure:</strong> Deploy S3 Bucket, Knowledge Base, and single Lambda via CDK.</li>
+        <li><strong>Constraint:</strong> No conversation history. Every request is isolated.</li>
+    </ul>
+
+    <h3>Phase 2: Stateful Context (Weeks 3-4)</h3>
+    <ul>
+        <li><strong>Goal:</strong> Enable "Chat" and User Preference learning.</li>
+        <li><strong>Action:</strong> Check "Enable Memory" in Bedrock Console.</li>
+        <li><strong>Feature:</strong> Agent learns "User X prefers Python responses" automatically.</li>
+    </ul>
+
+    <h2>5. Security & Operational Overhead</h2>
+    <ul>
+        <li><strong>Authentication:</strong> Relies on standard <code>AWS IAM</code>. No custom API keys.</li>
+        <li><strong>Network:</strong> Lambda runs inside VPC to access internal MCP servers.</li>
+        <li><strong>Cost Model:</strong> Pay-per-token. Estimated at ~$50/month for 30 users (low volume).</li>
+    </ul>
+
+    <footer>
+        Generated by <strong>Gemini</strong> | AWS Thought Partner | January 2026
+    </footer>
+
+</body>
+</html>
